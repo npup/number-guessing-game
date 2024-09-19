@@ -37,6 +37,7 @@ def print_error(message: str) -> None:
     """
     __print_message(message, Indicators.ERROR)
 
+
 def print_fatal(message: str) -> None:
     """
     Print a message with the FATAL indicator.
@@ -91,6 +92,7 @@ def __print_message(message: str, indicator: str) -> None:
 
 class Indicators:
     """Predefined colored indicators for various message types."""
+
 
     class __Codes:
         """ANSI escape codes for text formatting and colors."""
