@@ -1,11 +1,13 @@
-import game
+from settings import Settings
+from game import Game
 
 def main():
-    """    
-    This function serves as the entry point for the application,
-    delegating execution to the play function of the game module.
-    """
-    game.play()
+    settings = Settings()
+    game = Game(settings)
+    try:
+        game.play()
+    except ValueError as e:
+         print(f"Error: {e}")
 
 
 if __name__ == "__main__":

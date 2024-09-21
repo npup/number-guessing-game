@@ -1,162 +1,182 @@
-import sys
-
+from datetime import datetime
+import regex
+from settings import Settings
+from player import Player
+from number_list import NumberList
 import util
-import core
-import settings
 
-def play() -> None:
-    """Run the main game loop for the number guessing game.
 
-    The number guessing game, version A.
-    Handles player input, game logic, and output.
+class InvalidInputError(Exception):
+    """Exception raised for invalid user input.
+
+    This exception is used when the user provides input that doesn't meet
+    the required criteria or format in various input functions.
     """
-
-    # sanity check of game settings. game quites if not OK.
-    try:
-        sanity_check()
-    except Exception as e:
-        util.print_fatal(str(e))
-        sys.exit(1)
-
-    # collect player data
-    player_name = get_valid_player_name()
-    validate_player_age(settings.MINIMUM_AGE_YEARS)
-    
-    # play game until player wants to quit
-    while do_guessing_game(player_name):
-        util.print_info("Another round of the guessing game coming up...")
-
-    util.print_info(f"Goodbye, {player_name}!")
+    pass
 
 
-def get_valid_player_name() -> str:
-    """Prompt the user for their full name and validate the input.
+class Game:
+    def __init__(self, settings: Settings):
+        self.settings: Settings = settings
+        self.player: Player = None
+        self.number_list: NumberList = None
+        self.secret_number: int = None
+        self.attempts_count: int = 0
+        self.recent_guess: int = None
 
-    This function repeatedly asks the user for their name (first and last)
-    until a valid input is provided.
-
-    Returns:
-        str: A valid player name.
-
-    """
-    while True:
-        try:
-            return core.read_player_name()
-        except core.InvalidInputError as e:
-            util.print_error(str(e))
-
-
-def validate_player_age(minimum_age_years: int) -> int:
-    """Validate player's age against the minimum requirement.
-
-    This function repeatedly prompts the user for their birthdate until a valid input
-    that meets the age requirement is provided.
-
-    Args:
-        minimum_age_years (int): The minimum age required to proceed.
-
-    Returns:
-        int: The player's age in years, once a valid age meeting the minimum requirement is provided.
-
-    """
-    while True:
-        try:
-            player_birthdate = core.read_birthdate()
-            player_age = core.calculate_age(player_birthdate)
-            if player_age >= minimum_age_years:
-                return player_age
-            util.print_error(f"Age limit is {minimum_age_years} years.")
-        except core.InvalidInputError as e:
-            util.print_error(str(e))
+    def create_player(self):
+        util.print_info("Game setup...")
+        player_name = self.get_player_name()
+        player_age = self.get_player_age()
+        self.player = Player(player_name, player_age)
 
 
-def do_guessing_game(player_name: str) -> bool:
-    """Execute a round of the number guessing game.
-
-    This function handles the main game logic, including generating the lucky number,
-    managing the guessing phases, and displaying the game results.
-
-    Args:
-        player_name (str): The name of the current player.
-
-    Returns:
-        bool: True if the player wants to play again, False otherwise.
-
-    """
-    
-    lucky_list, lucky_number = core.create_numbers(
-        list_size=settings.LIST_SIZE,
-        lower_bound=settings.LIST_NUMBERS_LOWER_BOUND,
-        upper_bound=settings.LIST_NUMBERS_UPPER_BOUND
-    )
-
-    # Welcome message
-    print_welcome_message(player_name, secret_number=lucky_number)
-
-    # guessing, phase 1
-    success, attempts_count, guessed_number = core.player_guess_phase1(lucky_list, lucky_number)
-
-    # guessing, phase 2
-    if not success:
-        # remove should always succeed here, but a safe guard is ok
-        if guessed_number in lucky_list:
-            lucky_list.remove(guessed_number)
-
-        success, attempts_count = core.player_guess_phase2(
-            lucky_list,
-            secret_number=lucky_number,
-            attempts_count=attempts_count,
-            list_min_size=settings.MIN_LIST_SIZE,
-            range_threshold=settings.RANGE_THRESHOLD
-        )
-
-    # game end
-    print_results(success, attempts_count)
-
-    return core.play_again()
-
-
-def print_welcome_message(player_name: str, secret_number: int) -> None:
-    """Display a welcome message and optional debug information.
-
-    Args:
-        player_name: The name of the player.
-        secret_number: The secret number to be guessed.
-    """
-    print("")
-    util.print_info(f"<<<*= Welcome to the number guessing game, {player_name}! =*>>>")
-    if settings.DEBUG:
-        util.print_info(f"Psst! The secret number is {secret_number}.")
-
-
-def print_results(success: bool, attempts_count: int) -> None:
-    """Display the final game results to the player.
-
-    Args:
-        success: Whether the player found the lucky number.
-        attempts_count: Number of attempts made by the player.
-    """
-    print("")
-    attempts_word = "attempt" if attempts_count == 1 else "attempts"
-    if success:
-        util.print_info(f"Congrats, game is over! You found the lucky number in {attempts_count} {attempts_word}.")
-    else:
-        util.print_info(f"Game is over. You got to use {attempts_count} {attempts_word}, but did not find the lucky number.")
+    def play(self):
+        self.create_player()
+        while self.game_loop():
+            util.print_info("Another round of the guessing game coming up...")
+        util.print_info(f"Goodbye, {self.player.name}!")
 
 
 
-def sanity_check() -> None:
-    """Perform sanity checks of game settings.
+    def game_loop(self) -> bool:
+        self.create_list()
+        print("")
+        util.print_info(f"<<<*= Welcome to the number guessing game, {self.player.name}! =*>>>")
+        if self.settings.DEBUG:
+            util.print_info(f"Psst! The secret number is {self.secret_number}.")
+            
+        success = self.game_phase1()
+        
+        # guessing, phase 2
+        if not success:
+            success = self.game_phase2()
+        
+        # game end
+        self.print_results(success)
+        
+        return self.play_again()
+        
+        
+    def play_again(self) -> bool:
+        while True:
+            play_again = util.prompt_input("Would you like to play again? (y/n)")
+            match play_again.lower():
+                case "y":
+                    return True
+                case "n":
+                    return False
+                case _:
+                    util.print_error("Enter \"y\" or \"n\" for yes and no, respectively.")
 
-    Raises:
-        Exception: If the numbers range is less than 1 or smaller than the list size.
 
-    This function checks if:
-    1. The range of numbers (upper bound - lower bound) is at least 1.
-    2. The range of numbers is not smaller than the specified list size.
-    """
-    numbers_range = settings.LIST_NUMBERS_UPPER_BOUND - settings.LIST_NUMBERS_LOWER_BOUND + 1
-    if numbers_range < 1:
-        raise Exception(f"The numbers range ({settings.LIST_NUMBERS_LOWER_BOUND} -> {settings.LIST_NUMBERS_UPPER_BOUND}) is too small for the game to work!")
-    elif numbers_range < settings.LIST_SIZE:
-        raise Exception(f"The game will not work if numbers range ({numbers_range}) is smaller than the list size ({settings.LIST_SIZE}).")
+    def game_phase2(self) -> bool:
+        self.number_list.clamp(self.secret_number, self.settings.RANGE_THRESHOLD)
+
+        while True:
+            self.number_list.remove(self.recent_guess)
+
+            if self.number_list.size() < self.settings.MIN_LIST_SIZE:
+                util.print_warning(f"The list is now too short for game to continue: {self.number_list}")
+                return False
+            
+            self.attempts_count += 1
+            self.print_list(f"This is attempt #{self.attempts_count}. The new list is", self.number_list)
+            
+            guess = util.prompt_input_int("Enter your guess for the lucky number")
+            if guess == self.secret_number:
+                util.print_ok("Correct!")
+                return True
+            if  not self.number_list.contains(guess):
+                util.print_error(f"Wrong. {guess} is not even in the list.")
+            else:
+                util.print_error("Wrong.")
+                self.number_list.remove(guess)
+
+
+    def print_results(self, success: bool) -> None:
+        """Display the final game results to the player.
+
+        Args:
+            success: Whether the player found the lucky number.
+            attempts_count: Number of attempts made by the player.
+        """
+        print("")
+        attempts_word = "attempt" if self.attempts_count == 1 else "attempts"
+        if success:
+            util.print_info(f"Congrats, game is over! You found the lucky number in {self.attempts_count} {attempts_word}.")
+        else:
+            util.print_info(f"Game is over. You got to use {self.attempts_count} {attempts_word}, but did not find the lucky number.")
+        
+
+    def create_list(self) -> None:
+        # create list of numbers to guess from
+        self.number_list = NumberList(self.settings.LIST_SIZE, self.settings.LIST_NUMBERS_LOWER_BOUND, self.settings.LIST_NUMBERS_UPPER_BOUND)        
+        # select one the numbers as the "lucky number" 
+        self.secret_number = self.number_list.random_choice()
+        
+
+    def game_phase1(self) -> bool:
+        self.print_list("Here is the lucky list", self.number_list)
+        print()
+
+        self.recent_guess = util.prompt_input_int("Enter your guess for the lucky number")
+        self.attempts_count = 1
+
+        if self.recent_guess == self.secret_number:
+            util.print_ok("Correct!")
+            return True
+
+        if not self.number_list.contains(self.recent_guess):
+            util.print_error(f"Wrong. {self.recent_guess} is not even in the list.")
+        else:
+            util.print_error("Wrong.")
+        
+        return False
+
+
+    def print_list(self, message: str, numbers: list[int]) -> None:
+        """Print a message followed by a list of numbers.
+
+        Args:
+            message (str): The message to print before the list.
+            numbers (list[int]): The list of numbers to print.
+        """
+        print(f"\n{message}:\n{numbers}")
+
+
+
+    def get_player_name(self) -> str:
+        while True:
+            try:
+                name = util.prompt_input("Full name (first, last)")
+                if not regex.match(r'^\p{L}+[\s\t]\p{L}+$', name, regex.UNICODE):
+                    raise InvalidInputError("Enter a first- and a lastname, separated by exactly one (1) white space character.")
+                names = name.split()
+                first_name, last_name = names
+                if not all(name.isalpha() for name in names):
+                    raise InvalidInputError("The names shall only contain letters.")
+                break
+            except InvalidInputError as e:
+                util.print_error(str(e))
+        return f"{first_name} {last_name}"
+
+
+    def get_player_age(self) -> int:
+        while True:
+            now = datetime.now()
+            try:
+                birth_date_str = util.prompt_input("Enter your birth date [yyyyMMdd]")
+                birth_date = datetime.strptime(birth_date_str, "%Y%m%d")
+                player_age = now.year - birth_date.year
+                if now < birth_date.replace(year=now.year):
+                    player_age -= 1
+
+                if now < birth_date or birth_date.year <= self.settings.MINIMUM_YEAR:
+                    util.print_error(f"The year must be in the past (but after {self.settings.MINIMUM_YEAR}) to be believable!")
+                elif player_age < self.settings.MINIMUM_AGE_YEARS:
+                    util.print_error(f"Age limit is {self.settings.MINIMUM_AGE_YEARS} years.")
+                else:
+                    break
+            except ValueError:
+                util.print_error("Invalid date - use the format yyyyMMdd!")
