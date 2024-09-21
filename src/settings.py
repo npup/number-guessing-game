@@ -7,17 +7,33 @@ from typing import Any
 
 @dataclass(frozen=True)
 class Settings:
+    ###########################
+    # debug settings
+    ###########################
+    # some extra info may be printed with debug = True
     DEBUG: bool = field(default=True)
+
+    ###########################
+    # player settings
+    ###########################
+    # age restriction to play the game
     MINIMUM_AGE_YEARS: int = field(default=18)
+
+    ###########################
+    # game settings
+    ###########################
+    # size of list and range of numbers to guess from
     MINIMUM_YEAR: int = field(default=1900)
     LIST_SIZE: int = field(default=10)
     LIST_NUMBERS_LOWER_BOUND: int = field(default=0)
     LIST_NUMBERS_UPPER_BOUND: int = field(default=100)
+
+    # if list size is smaller than this, game is over
     MIN_LIST_SIZE: int = field(default=3)
+
+    # when clamping the list for phase 2, this is the range used
     RANGE_THRESHOLD: int = field(default=10)
 
-    def __post_init__(self):
-        self.validate()
 
     def __init__(self, **kwargs: Any):
         # Use default values for fields not specified in kwargs
@@ -30,6 +46,11 @@ class Settings:
             object.__setattr__(self, key, value)
         
         self.__post_init__()
+
+
+    def __post_init__(self):
+        self.validate()
+
 
     def validate(self) -> None:
         # Validate settings

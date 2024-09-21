@@ -1,13 +1,14 @@
 from settings import Settings
+import util 
 from game import Game
 
 def main():
-    settings = Settings()
-    game = Game(settings)
     try:
+        settings = Settings()
+        game = Game(settings)
         game.play()
     except ValueError as e:
-         print(f"Error: {e}")
+         util.print_fatal(f"Fatal error: {e}")
 
 
 if __name__ == "__main__":

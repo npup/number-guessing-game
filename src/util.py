@@ -1,3 +1,6 @@
+from __future__ import annotations
+from enum import Enum, auto
+
 
 def prompt_input(label: str) -> str:
     """
@@ -26,6 +29,18 @@ def prompt_input_int(label: str) -> int:
         if attempt.isnumeric():
             return int(attempt)
         print_error("Not an integer. Try again!")
+
+
+def prompt_input_boolean(label: str) -> bool:
+    while True:
+        answer = prompt_input(f"{label} ({Choice.YES}/{Choice.NO})")
+        choice = Choice.from_string(answer)
+        print("answer", answer, choice)
+        match choice:
+            case Choice.YES | Choice.NO:
+                return choice == Choice.YES
+            case _:
+                print_error(f"Enter \"{Choice.YES}\" or \"{Choice.NO}\" for yes and no, respectively.")
 
 
 def print_error(message: str) -> None:
@@ -115,3 +130,38 @@ class Indicators:
     WARNING = f"{__Codes.BOLD}{__Codes.YELLOW}[ ! ]{__Codes.RESET}"
     ERROR = f"{__Codes.BOLD}{__Codes.RED}[ × ]{__Codes.RESET}"
     FATAL = f"{__Codes.BOLD}{__Codes.RED}[×××]{__Codes.RESET}"
+
+
+class Choice(Enum):
+    """Represents a binary choice (Yes/No) in the game."""
+
+    YES = auto()
+    NO = auto()
+
+    @classmethod
+    def from_string(cls, s: str) -> 'Choice' | None:
+        """Convert a string input to a Choice enum value.
+
+        Args:
+            s: The input string to convert.
+
+        Returns:
+            The corresponding Choice enum value if the input is valid,
+            or None if the input doesn't match any valid choice.
+        """
+        match s.lower():
+            case "y":
+                return Choice.YES
+            case "n":
+                return Choice.NO
+            case _:
+                return None
+
+    def __str__(self) -> str:
+        match self:
+            case Choice.YES:
+                return "y"
+            case Choice.NO:
+                return "n"
+            case _:
+                return None
