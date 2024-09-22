@@ -1,4 +1,3 @@
-
 def prompt_input(label: str) -> str:
     """
     Prompt the user for string input with a given label.
@@ -89,13 +88,12 @@ def __print_message(message: str, indicator: str) -> None:
     print(f"{indicator} {message}")
 
 
-
 class Indicators:
     """Predefined colored indicators for various message types."""
 
-
     class __Codes:
         """ANSI escape codes for text formatting and colors."""
+
         # bold
         BOLD = "\033[1m"
         # colors

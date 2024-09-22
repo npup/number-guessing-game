@@ -2,6 +2,7 @@
 Configuration settings for the number guessing game.
 This module contains constants used throughout the game.
 """
+
 from typing import Final
 
 ###########################

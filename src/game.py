@@ -4,6 +4,7 @@ import util
 import core
 import settings
 
+
 def play() -> None:
     """Run the main game loop for the number guessing game.
 
@@ -21,7 +22,7 @@ def play() -> None:
     # collect player data
     player_name = get_valid_player_name()
     validate_player_age(settings.MINIMUM_AGE_YEARS)
-    
+
     # play game until player wants to quit
     while do_guessing_game(player_name):
         util.print_info("Another round of the guessing game coming up...")
@@ -83,18 +84,20 @@ def do_guessing_game(player_name: str) -> bool:
         bool: True if the player wants to play again, False otherwise.
 
     """
-    
+
     lucky_list, lucky_number = core.create_numbers(
         list_size=settings.LIST_SIZE,
         lower_bound=settings.LIST_NUMBERS_LOWER_BOUND,
-        upper_bound=settings.LIST_NUMBERS_UPPER_BOUND
+        upper_bound=settings.LIST_NUMBERS_UPPER_BOUND,
     )
 
     # Welcome message
     print_welcome_message(player_name, secret_number=lucky_number)
 
     # guessing, phase 1
-    success, attempts_count, guessed_number = core.player_guess_phase1(lucky_list, lucky_number)
+    success, attempts_count, guessed_number = core.player_guess_phase1(
+        lucky_list, lucky_number
+    )
 
     # guessing, phase 2
     if not success:
@@ -107,7 +110,7 @@ def do_guessing_game(player_name: str) -> bool:
             secret_number=lucky_number,
             attempts_count=attempts_count,
             list_min_size=settings.MIN_LIST_SIZE,
-            range_threshold=settings.RANGE_THRESHOLD
+            range_threshold=settings.RANGE_THRESHOLD,
         )
 
     # game end
@@ -139,10 +142,13 @@ def print_results(success: bool, attempts_count: int) -> None:
     print("")
     attempts_word = "attempt" if attempts_count == 1 else "attempts"
     if success:
-        util.print_info(f"Congrats, game is over! You found the lucky number in {attempts_count} {attempts_word}.")
+        util.print_info(
+            f"Congrats, game is over! You found the lucky number in {attempts_count} {attempts_word}."
+        )
     else:
-        util.print_info(f"Game is over. You got to use {attempts_count} {attempts_word}, but did not find the lucky number.")
-
+        util.print_info(
+            f"Game is over. You got to use {attempts_count} {attempts_word}, but did not find the lucky number."
+        )
 
 
 def sanity_check() -> None:
@@ -155,8 +161,14 @@ def sanity_check() -> None:
     1. The range of numbers (upper bound - lower bound) is at least 1.
     2. The range of numbers is not smaller than the specified list size.
     """
-    numbers_range = settings.LIST_NUMBERS_UPPER_BOUND - settings.LIST_NUMBERS_LOWER_BOUND + 1
+    numbers_range = (
+        settings.LIST_NUMBERS_UPPER_BOUND - settings.LIST_NUMBERS_LOWER_BOUND + 1
+    )
     if numbers_range < 1:
-        raise Exception(f"The numbers range ({settings.LIST_NUMBERS_LOWER_BOUND} -> {settings.LIST_NUMBERS_UPPER_BOUND}) is too small for the game to work!")
+        raise Exception(
+            f"The numbers range ({settings.LIST_NUMBERS_LOWER_BOUND} -> {settings.LIST_NUMBERS_UPPER_BOUND}) is too small for the game to work!"
+        )
     elif numbers_range < settings.LIST_SIZE:
-        raise Exception(f"The game will not work if numbers range ({numbers_range}) is smaller than the list size ({settings.LIST_SIZE}).")
+        raise Exception(
+            f"The game will not work if numbers range ({numbers_range}) is smaller than the list size ({settings.LIST_SIZE})."
+        )

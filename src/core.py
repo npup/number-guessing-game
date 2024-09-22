@@ -11,8 +11,8 @@ class InvalidInputError(Exception):
     This exception is used when the user provides input that doesn't meet
     the required criteria or format in various input functions.
     """
-    pass
 
+    pass
 
 
 def read_player_name() -> str:
@@ -26,8 +26,10 @@ def read_player_name() -> str:
     """
     attempt = util.prompt_input("Full name (first, last)")
 
-    if not regex.match(r'^\p{L}+[\s\t]\p{L}+$', attempt, regex.UNICODE):
-        raise InvalidInputError("Enter a first- and a lastname, separated by exactly one (1) white space character.")
+    if not regex.match(r"^\p{L}+[\s\t]\p{L}+$", attempt, regex.UNICODE):
+        raise InvalidInputError(
+            "Enter a first- and a lastname, separated by exactly one (1) white space character."
+        )
 
     names = attempt.split()
 
@@ -36,7 +38,6 @@ def read_player_name() -> str:
         raise InvalidInputError("The names shall only contain letters.")
 
     return f"{first_name} {last_name}"
-
 
 
 def read_birthdate() -> str:
@@ -54,11 +55,12 @@ def read_birthdate() -> str:
     try:
         date = datetime.strptime(attempt, "%Y%m%d")
         if now < date or date.year <= MINIMUM_YEAR:
-            raise InvalidInputError(f"The year must be in the past (but after {MINIMUM_YEAR}) to be believable!")
+            raise InvalidInputError(
+                f"The year must be in the past (but after {MINIMUM_YEAR}) to be believable!"
+            )
         return date.strftime("%Y%m%d")
     except ValueError:
         raise InvalidInputError("Invalid date - use the format yyyyMMdd!")
-
 
 
 def calculate_age(birthdate: str) -> int:
@@ -81,8 +83,9 @@ def calculate_age(birthdate: str) -> int:
     return age
 
 
-
-def create_numbers(list_size: int, lower_bound: int, upper_bound: int) -> tuple[list[int], int]:
+def create_numbers(
+    list_size: int, lower_bound: int, upper_bound: int
+) -> tuple[list[int], int]:
     """Create a list of unique numbers and a lucky number within a specified range.
 
     This function generates a list of unique random numbers and a separate lucky
@@ -100,9 +103,11 @@ def create_numbers(list_size: int, lower_bound: int, upper_bound: int) -> tuple[
             - A randomly selected lucky number from the same range.
     """
     # create list of numbers to guess from
-    numbers = generate_lucky_list(size=list_size, lower_bound=lower_bound, upper_bound=upper_bound)
+    numbers = generate_lucky_list(
+        size=list_size, lower_bound=lower_bound, upper_bound=upper_bound
+    )
 
-    # select one the numbers as the "lucky number" 
+    # select one the numbers as the "lucky number"
     secret_number = random.choice(numbers)
 
     return numbers, secret_number
@@ -110,7 +115,7 @@ def create_numbers(list_size: int, lower_bound: int, upper_bound: int) -> tuple[
 
 def generate_lucky_list(size: int, lower_bound: int, upper_bound: int) -> list[int]:
     """Generate list of random numbers within a specified range.
-    
+
     The numbers are unique within the list.  The list is sorted in ascending order.
 
     Args:
@@ -148,8 +153,9 @@ def print_list(message: str, numbers: list[int]) -> None:
     print(f"\n{message}:\n{numbers}")
 
 
-
-def player_guess_phase1(numbers: list[int], secret_number: int) -> tuple[bool, int, int]:
+def player_guess_phase1(
+    numbers: list[int], secret_number: int
+) -> tuple[bool, int, int]:
     """Conduct phase 1 of the player guessing game with a single guess attempt.
 
     Args:
@@ -176,14 +182,19 @@ def player_guess_phase1(numbers: list[int], secret_number: int) -> tuple[bool, i
         util.print_error(f"Wrong. {guessed_number} is not even in the list.")
     else:
         util.print_error("Wrong.")
-    
+
     return False, attempts_count, guessed_number
 
 
-
-def player_guess_phase2(numbers: list[int], secret_number: int, attempts_count: int, list_min_size: int, range_threshold: int) -> tuple[bool, int]:
+def player_guess_phase2(
+    numbers: list[int],
+    secret_number: int,
+    attempts_count: int,
+    list_min_size: int,
+    range_threshold: int,
+) -> tuple[bool, int]:
     """Conduct phase 2 of the player guessing game with a shrinking list of numbers.
-    
+
     Phase 2 continues until either of these events occur:
         - Player guesses the secret number correctly
         - The list of numbers is deemed "too short" for the game to continue
@@ -202,7 +213,9 @@ def player_guess_phase2(numbers: list[int], secret_number: int, attempts_count: 
     """
     lower_bound = secret_number - range_threshold
     upper_bound = secret_number + range_threshold
-    clamped_list = clamp_list(numbers=numbers, lower_bound=lower_bound, upper_bound=upper_bound)
+    clamped_list = clamp_list(
+        numbers=numbers, lower_bound=lower_bound, upper_bound=upper_bound
+    )
 
     while True:
         if list_too_short(clamped_list, list_min_size):
@@ -222,7 +235,6 @@ def player_guess_phase2(numbers: list[int], secret_number: int, attempts_count: 
     return False, attempts_count
 
 
-
 def clamp_list(numbers: list[int], lower_bound: int, upper_bound: int) -> list[int]:
     """Create a new list containing only numbers within the specified range.
 
@@ -240,7 +252,6 @@ def clamp_list(numbers: list[int], lower_bound: int, upper_bound: int) -> list[i
     return [number for number in numbers if lower_bound <= number <= upper_bound]
 
 
-
 def shrink_list(numbers: list[int], value_to_remove: int) -> list[int]:
     """Remove all occurrences of a specific value from the list.
 
@@ -252,7 +263,6 @@ def shrink_list(numbers: list[int], value_to_remove: int) -> list[int]:
         list[int]: A new list with all occurrences of value_to_remove removed.
     """
     return [number for number in numbers if number != value_to_remove]
-
 
 
 def list_too_short(numbers: list[int], min_size: int) -> bool:
@@ -271,12 +281,11 @@ def list_too_short(numbers: list[int], min_size: int) -> bool:
     return False
 
 
-
 def play_again() -> bool:
     """Prompts the user to decide whether to play again and returns their decision.
 
     This function repeatedly prompts the user with the question "Would you like to play again? (y/n)".
-    It converts the user's input to lowercase and matches it against "y" for yes and "n" for no.    
+    It converts the user's input to lowercase and matches it against "y" for yes and "n" for no.
     If the input is anything else, it prints an error message and prompts the user again.
 
     Returns:
@@ -290,5 +299,4 @@ def play_again() -> bool:
             case "n":
                 return False
             case _:
-                util.print_error("Enter \"y\" or \"n\" for yes and no, respectively.")
-
+                util.print_error('Enter "y" or "n" for yes and no, respectively.')
