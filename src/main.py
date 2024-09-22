@@ -3,9 +3,11 @@
 This module initializes the game settings, creates a game instance,
 and handles the main game execution.
 """
+
 from settings import Settings
-import util 
+import util
 from game import Game
+
 
 def main():
     """Initialize and run the number guessing game.
@@ -16,12 +18,13 @@ def main():
     during the game setup or execution, printing a fatal error message
     if one occurs.
     """
+
     try:
         settings = Settings()
         game = Game(settings)
         game.play()
     except ValueError as e:
-         util.print_fatal(f"Fatal error: {e}")
+        util.print_fatal(f"Fatal error: {e}")
 
 
 if __name__ == "__main__":

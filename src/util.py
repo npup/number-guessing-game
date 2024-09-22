@@ -40,7 +40,9 @@ def prompt_input_boolean(label: str) -> bool:
             case Choice.YES | Choice.NO:
                 return choice == Choice.YES
             case _:
-                print_error(f"Enter \"{Choice.YES}\" or \"{Choice.NO}\" for yes and no, respectively.")
+                print_error(
+                    f'Enter "{Choice.YES}" or "{Choice.NO}" for yes and no, respectively.'
+                )
 
 
 def print_error(message: str) -> None:
@@ -104,13 +106,12 @@ def __print_message(message: str, indicator: str) -> None:
     print(f"{indicator} {message}")
 
 
-
 class Indicators:
     """Predefined colored indicators for various message types."""
 
-
     class __Codes:
         """ANSI escape codes for text formatting and colors."""
+
         # bold
         BOLD = "\033[1m"
         # colors
@@ -139,7 +140,7 @@ class Choice(Enum):
     NO = auto()
 
     @classmethod
-    def from_string(cls, s: str) -> 'Choice' | None:
+    def from_string(cls, s: str) -> "Choice" | None:
         """Convert a string input to a Choice enum value.
 
         Args:

@@ -19,13 +19,11 @@ class Player:
         self.games_played = 0
         self.wins_count = 0
 
-
     def register_game_played(self, win: bool) -> None:
         """Record the result of a game played by the player."""
         self.games_played += 1
         if win:
             self.wins_count += 1
-
 
     def __str__(self) -> str:
         """Return a string representation of the Player."""

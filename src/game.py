@@ -8,7 +8,6 @@ from number_list import NumberList
 import util
 
 
-
 class InvalidInputError(Exception):
     """Exception raised for invalid user input.
 
@@ -42,7 +41,6 @@ class Game:
         player_age = self.get_player_age()
         self.player = Player(player_name, player_age)
 
-
     def play(self):
         """Start and manage the main game loop."""
         util.print_info("The number guessing game starts...")
@@ -51,7 +49,6 @@ class Game:
             util.print_info("Another round of the guessing game coming up...")
         util.print_info(f"Goodbye, {self.player.name}!")
         print(self.player)
-
 
     def game_loop(self) -> bool:
         """Run a single round of the game.
@@ -62,10 +59,12 @@ class Game:
 
         self.create_list()
         print("")
-        util.print_info(f"<<<*= Welcome to the number guessing game, {self.player.name}! =*>>>")
+        util.print_info(
+            f"<<<*= Welcome to the number guessing game, {self.player.name}! =*>>>"
+        )
         if self.settings.DEBUG:
             util.print_info(f"Psst! The secret number is {self.secret_number}.")
-            
+
         won = self.game_phase1()
 
         # if not won, guessing, phase 2
@@ -78,7 +77,6 @@ class Game:
 
         return self.play_again()
 
-
     def play_again(self) -> bool:
         """Ask the player if they want to play another round.
 
@@ -86,13 +84,11 @@ class Game:
             bool: True if the player wants to play again, False otherwise.
         """
 
-
         return util.prompt_input_boolean("Would you like to play again?")
-
 
     def game_phase2(self) -> bool:
         """Run the second phase of the game.
-        
+
         The list is clamped before each round.
 
         Returns:
@@ -105,22 +101,26 @@ class Game:
             self.number_list.remove(self.recent_guess)
 
             if self.number_list.size() < self.settings.MIN_LIST_SIZE:
-                util.print_warning(f"The list is now too short for game to continue: {self.number_list}")
+                util.print_warning(
+                    f"The list is now too short for game to continue: {self.number_list}"
+                )
                 return False
 
             self.attempts_count += 1
-            self.print_list(f"This is attempt #{self.attempts_count}. The new list is", self.number_list)
+            self.print_list(
+                f"This is attempt #{self.attempts_count}. The new list is",
+                self.number_list,
+            )
 
             guess = util.prompt_input_int("Enter your guess for the lucky number")
             if guess == self.secret_number:
                 util.print_ok("Correct!")
                 return True
-            if  not self.number_list.contains(guess):
+            if not self.number_list.contains(guess):
                 util.print_error(f"Wrong. {guess} is not even in the list.")
             else:
                 util.print_error("Wrong.")
                 self.number_list.remove(guess)
-
 
     def print_results(self, success: bool) -> None:
         """Display the final game results to the player.
@@ -132,18 +132,24 @@ class Game:
         print("")
         attempts_word = "attempt" if self.attempts_count == 1 else "attempts"
         if success:
-            util.print_info(f"Congrats, game is over! You found the lucky number in {self.attempts_count} {attempts_word}.")
+            util.print_info(
+                f"Congrats, game is over! You found the lucky number in {self.attempts_count} {attempts_word}."
+            )
         else:
-            util.print_info(f"Game is over. You got to use {self.attempts_count} {attempts_word}, but did not find the lucky number.")
-
+            util.print_info(
+                f"Game is over. You got to use {self.attempts_count} {attempts_word}, but did not find the lucky number."
+            )
 
     def create_list(self) -> None:
         """Initialize the number list and select a secret number."""
         # create list of numbers to guess from
-        self.number_list = NumberList(self.settings.LIST_SIZE, self.settings.LIST_NUMBERS_LOWER_BOUND, self.settings.LIST_NUMBERS_UPPER_BOUND)        
-        # select one the numbers as the "lucky number" 
+        self.number_list = NumberList(
+            self.settings.LIST_SIZE,
+            self.settings.LIST_NUMBERS_LOWER_BOUND,
+            self.settings.LIST_NUMBERS_UPPER_BOUND,
+        )
+        # select one the numbers as the "lucky number"
         self.secret_number = self.number_list.random_choice()
-        
 
     def game_phase1(self) -> bool:
         """Run the first phase of the game with the initial guess.
@@ -155,7 +161,9 @@ class Game:
         self.print_list("Here is the lucky list", self.number_list)
         print()
 
-        self.recent_guess = util.prompt_input_int("Enter your guess for the lucky number")
+        self.recent_guess = util.prompt_input_int(
+            "Enter your guess for the lucky number"
+        )
         self.attempts_count = 1
 
         if self.recent_guess == self.secret_number:
@@ -169,7 +177,6 @@ class Game:
 
         return False
 
-
     def print_list(self, message: str, numbers: list[int]) -> None:
         """Print a message followed by a list of numbers.
 
@@ -179,8 +186,6 @@ class Game:
         """
 
         print(f"\n{message}:\n{numbers}")
-
-
 
     def get_player_name(self) -> str:
         """Prompt for and validate the player's name.
@@ -195,8 +200,10 @@ class Game:
         while True:
             try:
                 name = util.prompt_input("Full name (first, last)")
-                if not regex.match(r'^\p{L}+[\s\t]\p{L}+$', name, regex.UNICODE):
-                    raise InvalidInputError("Enter a first- and a lastname, separated by exactly one (1) white space character.")
+                if not regex.match(r"^\p{L}+[\s\t]\p{L}+$", name, regex.UNICODE):
+                    raise InvalidInputError(
+                        "Enter a first- and a lastname, separated by exactly one (1) white space character."
+                    )
                 names = name.split()
                 first_name, last_name = names
                 if not all(name.isalpha() for name in names):
@@ -205,7 +212,6 @@ class Game:
             except InvalidInputError as e:
                 util.print_error(str(e))
         return f"{first_name} {last_name}"
-
 
     def get_player_age(self) -> int:
         """Prompt for and validate the player's age based on birth date.
@@ -227,9 +233,13 @@ class Game:
                     player_age -= 1
 
                 if now < birth_date or birth_date.year <= self.settings.MINIMUM_YEAR:
-                    util.print_error(f"The year must be in the past (but after {self.settings.MINIMUM_YEAR}) to be believable!")
+                    util.print_error(
+                        f"The year must be in the past (but after {self.settings.MINIMUM_YEAR}) to be believable!"
+                    )
                 elif player_age < self.settings.MINIMUM_AGE_YEARS:
-                    util.print_error(f"Age limit is {self.settings.MINIMUM_AGE_YEARS} years.")
+                    util.print_error(
+                        f"Age limit is {self.settings.MINIMUM_AGE_YEARS} years."
+                    )
                 else:
                     return player_age
             except ValueError:

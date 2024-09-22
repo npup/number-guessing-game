@@ -1,11 +1,12 @@
 import random
 
+
 class NumberList:
     """A class representing a list of unique random numbers within a specified range.
-    
+
     The numbers will be sorted in ascending order, left to right.
     """
-    
+
     def __init__(self, size: int, lower_bound: int, upper_bound: int):
         """Initialize the NumberList with random unique integers.
 
@@ -14,7 +15,9 @@ class NumberList:
             lower_bound: The lower bound of the range (inclusive).
             upper_bound: The upper bound of the range (inclusive).
         """
-        self.numbers: list[int] = sorted(random.sample(range(lower_bound, upper_bound + 1), size))
+        self.numbers: list[int] = sorted(
+            random.sample(range(lower_bound, upper_bound + 1), size)
+        )
 
     def contains(self, number: int) -> bool:
         """Check if the given number is in the list.
@@ -35,7 +38,7 @@ class NumberList:
         """
         if number in self.numbers:
             self.numbers.remove(number)
-        
+
     def random_choice(self) -> int:
         """
         Select and return a random number from the list.

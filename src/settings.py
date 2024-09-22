@@ -2,8 +2,10 @@
 Configuration settings for the number guessing game.
 This module contains settings used throughout the game.
 """
+
 from dataclasses import dataclass, field
 from typing import Any
+
 
 @dataclass(frozen=True)
 class Settings:
@@ -34,23 +36,20 @@ class Settings:
     # when clamping the list for phase 2, this is the range used
     RANGE_THRESHOLD: int = field(default=10)
 
-
     def __init__(self, **kwargs: Any):
         # Use default values for fields not specified in kwargs
         for field in self.__dataclass_fields__:
             if field not in kwargs:
                 kwargs[field] = self.__dataclass_fields__[field].default
-        
+
         # Initialize fields using object.__setattr__ to bypass frozen=True
         for key, value in kwargs.items():
             object.__setattr__(self, key, value)
-        
-        self.__post_init__()
 
+        self.__post_init__()
 
     def __post_init__(self):
         self.validate()
-
 
     def validate(self) -> None:
         # Validate settings
