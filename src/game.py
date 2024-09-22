@@ -12,7 +12,7 @@ def play() -> None:
     Handles player input, game logic, and output.
     """
 
-    # sanity check of game settings. game quites if not OK.
+    # sanity check of game settings. game quits if not OK.
     try:
         sanity_check()
     except Exception as e:
@@ -101,14 +101,11 @@ def do_guessing_game(player_name: str) -> bool:
 
     # guessing, phase 2
     if not success:
-        # remove should always succeed here, but a safe guard is ok
-        if guessed_number in lucky_list:
-            lucky_list.remove(guessed_number)
-
         success, attempts_count = core.player_guess_phase2(
             lucky_list,
             secret_number=lucky_number,
             attempts_count=attempts_count,
+            guessed_number=guessed_number,
             list_min_size=settings.MIN_LIST_SIZE,
             range_threshold=settings.RANGE_THRESHOLD,
         )

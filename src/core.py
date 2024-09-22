@@ -190,6 +190,7 @@ def player_guess_phase2(
     numbers: list[int],
     secret_number: int,
     attempts_count: int,
+    guessed_number: int,
     list_min_size: int,
     range_threshold: int,
 ) -> tuple[bool, int]:
@@ -218,19 +219,21 @@ def player_guess_phase2(
     )
 
     while True:
+        # remove should always succeed here, but a safe guard is ok
+        if guessed_number in clamped_list:
+            clamped_list.remove(guessed_number)
         if list_too_short(clamped_list, list_min_size):
             break
         attempts_count += 1
         print_list(f"This is attempt #{attempts_count}. The new list is", clamped_list)
-        guess = util.prompt_input_int("Enter your guess for the lucky number")
-        if guess == secret_number:
+        guessed_number = util.prompt_input_int("Enter your guess for the lucky number")
+        if guessed_number == secret_number:
             util.print_ok("Correct!")
             return True, attempts_count
-        if guess not in clamped_list:
-            util.print_error(f"Wrong. {guess} is not even in the list.")
+        if guessed_number not in clamped_list:
+            util.print_error(f"Wrong. {guessed_number} is not even in the list.")
         else:
             util.print_error("Wrong.")
-        clamped_list = shrink_list(clamped_list, guess)
 
     return False, attempts_count
 
@@ -250,19 +253,6 @@ def clamp_list(numbers: list[int], lower_bound: int, upper_bound: int) -> list[i
         list[int]: A new list containing only numbers within the specified range.
     """
     return [number for number in numbers if lower_bound <= number <= upper_bound]
-
-
-def shrink_list(numbers: list[int], value_to_remove: int) -> list[int]:
-    """Remove all occurrences of a specific value from the list.
-
-    Args:
-        numbers (list[int]): The input list of integers.
-        value_to_remove (int): The value to be removed from the list.
-
-    Returns:
-        list[int]: A new list with all occurrences of value_to_remove removed.
-    """
-    return [number for number in numbers if number != value_to_remove]
 
 
 def list_too_short(numbers: list[int], min_size: int) -> bool:
