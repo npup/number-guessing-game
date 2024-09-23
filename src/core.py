@@ -204,6 +204,7 @@ def player_guess_phase2(
         numbers (list[int]): The initial list of numbers.
         secret_number (int): The number the player needs to guess.
         attempts_count (int): The number of attempts made so far.
+        guessed_number (int): The number guessed by the player.
         list_min_size: The minimum size the list can shrink to before ending the game.
         range_threshold: The range around the secret number to clamp the list.
 
