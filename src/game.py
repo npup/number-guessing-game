@@ -1,3 +1,18 @@
+"""
+This module contains the main game logic for the number guessing game.
+
+It defines the Game class which manages the game flow, player creation,
+and game rounds. It also includes an InvalidInputError exception for
+handling user input errors.
+
+Classes:
+    InvalidInputError: Custom exception for invalid user input.
+    Game: Main class for managing the number guessing game.
+
+The module relies on other custom modules like settings, player,
+number_list, and util for various functionalities.
+"""
+
 from datetime import datetime
 
 import regex
